@@ -1,0 +1,32 @@
+docker-compose up -d --build
+
+// atualizar a imagem local
+docker-compose build .
+
+// subir o container
+docker-compose up
+
+//  Entrar no container
+docker-compose exec php /bin/bash
+
+// verificar erquisitos do Symfony
+symfony check:requirements
+
+// create new Symfony
+composer create-project symfony/skeleton app
+
+//dependencias
+composer req --dev maker ormfixtures fakerphp/faker
+
+// create a .env.local file from the existing .env file which Symfony generated during the creation of the project
+cp .env .env.local
+
+// Criar entidade
+symfony console make:entity User
+
+//remove entidade em:
+/src/Entity
+/src/Repository
+
+// criar migração
+symfony console make:migration
