@@ -31,3 +31,7 @@ symfony console make:entity User
 
 // criar migração
 symfony console make:migration
+
+
+//Adiciona dependencia
+composer require annotation
