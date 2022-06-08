@@ -13,7 +13,8 @@ docker-compose exec php /bin/bash
 symfony check:requirements
 
 // create new Symfony
-composer create-project symfony/skeleton app
+cd ..
+composer create-project symfony/skeleton symfony_docker
 
 //dependencias
 composer req --dev maker ormfixtures fakerphp/faker
