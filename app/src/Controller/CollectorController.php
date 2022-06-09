@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Collector;
+use App\Model\Collector as ModelCollector;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,9 +19,18 @@ class CollectorController extends AbstractController
      */
     protected EntityManagerInterface $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager)
-    {
+    /**
+     *
+     * @var ModelCollector
+     */
+    protected ModelCollector $modelCollector;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        ModelCollector $modelCollector
+    ) {
         $this->entityManager = $entityManager;
+        $this->modelCollector = $modelCollector;
     }
 
     /**
@@ -41,14 +51,7 @@ class CollectorController extends AbstractController
     public function save(Request $request): Response
     {
         $body = $request->getContent();
-        $dataJson = json_decode($body);
-
-        $collector = new Collector(
-            $dataJson->main_name,
-            $dataJson->fetch_collection,
-            $dataJson->receive_collection,
-            $dataJson->phone_number_call
-        );
+        $collector = $this->modelCollector->createCollector($body);
 
         $this->entityManager->persist($collector);
         $this->entityManager->flush();
@@ -61,8 +64,7 @@ class CollectorController extends AbstractController
      */
     public function getOneBy(int $id): Response
     {
-        $repositoryCollectors = $this->entityManager->getRepository(Collector::class);
-        $collector = $repositoryCollectors->find($id);
+        $collector = $this->getOneById($id);
 
         $code = $collector ? Response::HTTP_OK : Response::HTTP_NO_CONTENT;
 
@@ -75,31 +77,29 @@ class CollectorController extends AbstractController
     public function update(int $id, Request $request): Response
     {
         $body = $request->getContent();
-        $dataJson = json_decode($body);
+        $collector = $this->modelCollector->createCollector($body);
 
-        $collector = new Collector(
-            $dataJson->main_name,
-            $dataJson->fetch_collection,
-            $dataJson->receive_collection,
-            $dataJson->phone_number_call
-        );
+        $existingCollector = $this->getOneById($id);
 
-        $repositoryCollectors = $this->entityManager->getRepository(Collector::class);
-        $collectorExist = $repositoryCollectors->find($id);
-
-        if (!$collectorExist) {
+        if (!$existingCollector) {
             return new JsonResponse(status: Response::HTTP_BAD_REQUEST);
         }
 
-        $collectorExist->mainName = $collector->mainName;
-        $collectorExist->fetchCollection = $collector->fetchCollection;
-        $collectorExist->receiveCollection = $collector->receiveCollection;
-        $collectorExist->phoneNumberCall = $collector->phoneNumberCall;
+        $existingCollector->mainName = $collector->mainName;
+        $existingCollector->fetchCollection = $collector->fetchCollection;
+        $existingCollector->receiveCollection = $collector->receiveCollection;
+        $existingCollector->phoneNumberCall = $collector->phoneNumberCall;
 
-        $this->entityManager->persist($collectorExist);
-
+        $this->entityManager->persist($existingCollector);
         $this->entityManager->flush();
 
-        return new JsonResponse($collectorExist, Response::HTTP_ACCEPTED);
+        return new JsonResponse($existingCollector, Response::HTTP_ACCEPTED);
+    }
+
+    private function getOneById(int $id): Collector
+    {
+        $repositoryCollectors = $this->entityManager->getRepository(Collector::class);
+
+        return $repositoryCollectors->find($id);
     }
 }

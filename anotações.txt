@@ -1,0 +1,10 @@
+transferencia de estado representacional
+REST - Representational State transfer
+
+> utilizando o HTTP eu consigo transferir estado dos dados de maneira que consiga acessar e enviar de forma unificada e generica
+
+Recursos: é o que manipulamos através da APIs REST
+
+necessário chamar dois métodos (persist e flush): o Doctrine mapeia todas as alterações em memória antes, e envia de uma só vez ao banco, otimizando (e muito) a performance da aplicação.
+
+o que ele chama de helper é na verdade o model que usamos
