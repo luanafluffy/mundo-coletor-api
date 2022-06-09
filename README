@@ -9,21 +9,16 @@ docker-compose up
 //  Entrar no container
 docker-compose exec php /bin/bash
 
-// verificar erquisitos do Symfony
+// verificar requisitos do Symfony
 symfony check:requirements
 
 // create new Symfony
 cd ..
 composer create-project symfony/skeleton symfony_docker
 
-//dependencias
-composer req --dev maker ormfixtures fakerphp/faker
 
 // create a .env.local file from the existing .env file which Symfony generated during the creation of the project
 cp .env .env.local
-
-// Criar entidade
-symfony console make:entity User
 
 //remove entidade em:
 /src/Entity
@@ -34,13 +29,20 @@ symfony console make:migration
 
 
 //Adiciona dependencias
+composer req --dev maker ormfixtures fakerphp/faker
 composer require annotation
 composer require symfony/orm-pack
 
 
-// listar comando
+// listar comandos (rodar na raiz do container)
 php bin/console list
 
 
 // criar tabela na base de dados
-php bin/console doctrine:database:create --if-not-exists symfony_docker
+php bin/console doctrine:database:create --if-not-exists
+
+// rodar migração para gerar tabela de arquivo modificados
+php bin/console doctrine:migrations:diff
+
+// pegar td os arquivos de migração e passa pro banco
+php bin/console doctrine:migrations:migrate
