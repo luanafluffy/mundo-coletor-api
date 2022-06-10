@@ -3,10 +3,17 @@
 namespace App\Model;
 
 use App\Entity\Collector as EntityCollector;
-use Doctrine\ORM\EntityManagerInterface;
 
 class Collector
 {
+    public function findAll(): EntityCollector
+    {
+        $repositoryCollectors = $this->entityManager->getRepository(
+            Collector::class
+        );
+
+        return $repositoryCollectors->findAll();
+    }
 
     public function createCollector(string $json): EntityCollector
     {
@@ -19,5 +26,4 @@ class Collector
             $dataJson->phone_number_call
         );
     }
-
 }

@@ -2,22 +2,24 @@
 
 namespace App\Controller;
 
-use App\Entity\Collector;
+use App\Helper\ValidateCodeHttp;
 use App\Model\Collector as ModelCollector;
+use App\Repository\CollectorRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class CollectorController extends AbstractController
 {
+    use ValidateCodeHttp;
+
     /**
      *
-     * @var EntityManagerInterface
+     * @var CollectorRepository
      */
-    protected EntityManagerInterface $entityManager;
+    protected CollectorRepository $repositoryCollector;
 
     /**
      *
@@ -26,10 +28,10 @@ class CollectorController extends AbstractController
     protected ModelCollector $modelCollector;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
+        CollectorRepository $repositoryCollector,
         ModelCollector $modelCollector
     ) {
-        $this->entityManager = $entityManager;
+        $this->repositoryCollector = $repositoryCollector;
         $this->modelCollector = $modelCollector;
     }
 
@@ -38,9 +40,7 @@ class CollectorController extends AbstractController
      */
     public function getAll(): Response
     {
-        $repositoryCollectors = $this->entityManager->getRepository(Collector::class);
-
-        $collectors = $repositoryCollectors->findAll();
+        $collectors = $this->modelCollector->findAll();
 
         return new JsonResponse($collectors);
     }
@@ -50,11 +50,10 @@ class CollectorController extends AbstractController
      */
     public function save(Request $request): Response
     {
-        $body = $request->getContent();
-        $collector = $this->modelCollector->createCollector($body);
+        $collectorData = $request->getContent();
+        $collector = $this->modelCollector->createCollector($collectorData);
 
-        $this->entityManager->persist($collector);
-        $this->entityManager->flush();
+        $this->repositoryCollector->save($collector);
 
         return new JsonResponse($collector);
     }
@@ -64,9 +63,9 @@ class CollectorController extends AbstractController
      */
     public function getOneBy(int $id): Response
     {
-        $collector = $this->getOneById($id);
+        $collector = $this->repositoryCollector->getOneById($id);
 
-        $code = $collector ? Response::HTTP_OK : Response::HTTP_NO_CONTENT;
+        $code = $this->getCodeHttp204Or200($collector);
 
         return new JsonResponse($collector, $code);
     }
@@ -76,30 +75,29 @@ class CollectorController extends AbstractController
      */
     public function update(int $id, Request $request): Response
     {
-        $body = $request->getContent();
-        $collector = $this->modelCollector->createCollector($body);
+        $collectorData = $request->getContent();
+        $newCollector = $this->modelCollector->createCollector($collectorData);
 
-        $existingCollector = $this->getOneById($id);
+        $actualCollector = $this->repositoryCollector->getOneById($id);
 
-        if (!$existingCollector) {
-            return new JsonResponse(status: Response::HTTP_BAD_REQUEST);
+        if ($actualCollector) {
+            $actualCollector = $this->repositoryCollector->update($actualCollector, $newCollector);
         }
 
-        $existingCollector->mainName = $collector->mainName;
-        $existingCollector->fetchCollection = $collector->fetchCollection;
-        $existingCollector->receiveCollection = $collector->receiveCollection;
-        $existingCollector->phoneNumberCall = $collector->phoneNumberCall;
+        $code = $this->getCodeHttp202Or400($actualCollector);
 
-        $this->entityManager->persist($existingCollector);
-        $this->entityManager->flush();
-
-        return new JsonResponse($existingCollector, Response::HTTP_ACCEPTED);
+        return new JsonResponse($actualCollector, $code);
     }
 
-    private function getOneById(int $id): Collector
+    /**
+     * @Route("/collectors/{id}", methods={"DELETE"})
+     */
+    public function delete(int $id): Response
     {
-        $repositoryCollectors = $this->entityManager->getRepository(Collector::class);
+        $collector = $this->repositoryCollector->getOneById($id);
 
-        return $repositoryCollectors->find($id);
+        $this->repositoryCollector->remove($collector);
+
+        return new JsonResponse(status: Response::HTTP_NO_CONTENT);
     }
 }
