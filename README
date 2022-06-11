@@ -38,9 +38,11 @@ composer require maker
 // listar comandos (rodar na raiz do container)
 php bin/console list
 
-
 // criar tabela na base de dados
 php bin/console doctrine:database:create --if-not-exists
+
+// apagar a base de dados
+php bin/console doctrine:database:drop --force
 
 // rodar migração para gerar tabela de arquivo modificados
 php bin/console doctrine:migrations:diff
@@ -53,4 +55,7 @@ php bin/console list make
 
 // comandos make
 php bin/console make:entity
+php bin/console make:controller
 php bin/console make:migrate
+
+
