@@ -6,15 +6,6 @@ use App\Entity\Collector as EntityCollector;
 
 class Collector
 {
-    public function findAll(): EntityCollector
-    {
-        $repositoryCollectors = $this->entityManager->getRepository(
-            Collector::class
-        );
-
-        return $repositoryCollectors->findAll();
-    }
-
     public function createCollector(string $json): EntityCollector
     {
         $dataJson = json_decode($json);

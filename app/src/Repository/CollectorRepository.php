@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Collector as EntityCollector;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface as EntityManager;
 
 class CollectorRepository
 {
@@ -16,9 +16,16 @@ class CollectorRepository
 
     public function getOneById(int $id): ?EntityCollector
     {
-        $repositoryCollectors = $this->entityManager->getRepository(Collector::class, $id);
+        $repositoryCollectors = $this->entityManager->getRepository(EntityCollector::class, $id);
 
         return $repositoryCollectors->find($id);
+    }
+
+    public function getAll(): ?array
+    {
+        $repositoryCollectors = $this->entityManager->getRepository(EntityCollector::class);
+
+        return $repositoryCollectors->findAll();
     }
 
     public function remove(EntityCollector $collector): void

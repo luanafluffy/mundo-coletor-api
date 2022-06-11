@@ -40,7 +40,7 @@ class CollectorController extends AbstractController
      */
     public function getAll(): Response
     {
-        $collectors = $this->modelCollector->findAll();
+        $collectors = $this->repositoryCollector->getAll();
 
         return new JsonResponse($collectors);
     }
@@ -65,7 +65,7 @@ class CollectorController extends AbstractController
     {
         $collector = $this->repositoryCollector->getOneById($id);
 
-        $code = $this->getCodeHttp204Or200($collector);
+        $code = $this->getCodeHttp($collector, Response::HTTP_OK, Response::HTTP_NO_CONTENT);
 
         return new JsonResponse($collector, $code);
     }
@@ -84,7 +84,7 @@ class CollectorController extends AbstractController
             $actualCollector = $this->repositoryCollector->update($actualCollector, $newCollector);
         }
 
-        $code = $this->getCodeHttp202Or400($actualCollector);
+        $code = $this->getCodeHttp($actualCollector, Response::HTTP_OK, Response::HTTP_NO_CONTENT);
 
         return new JsonResponse($actualCollector, $code);
     }
@@ -96,8 +96,12 @@ class CollectorController extends AbstractController
     {
         $collector = $this->repositoryCollector->getOneById($id);
 
-        $this->repositoryCollector->remove($collector);
+        if ($collector) {
+            $this->repositoryCollector->remove($collector);
+        }
 
-        return new JsonResponse(status: Response::HTTP_NO_CONTENT);
+        $code = $this->getCodeHttp($collector, Response::HTTP_OK, Response::HTTP_NO_CONTENT);
+
+        return new JsonResponse(status: $code);
     }
 }
