@@ -22,4 +22,11 @@ abstract class BaseController extends AbstractController
 
         return new JsonResponse($entityList);
     }
+
+    public function getOne(int $id): JsonResponse
+    {
+        $entity = $this->repository->find($id);
+
+        return $this->json($entity);
+    }
 }
