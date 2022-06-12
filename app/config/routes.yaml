@@ -5,3 +5,18 @@ controllers:
 kernel:
     resource: ../src/Kernel.php
     type: annotation
+
+states:
+    path:       /states
+    controller: App\Controller\StateController::getAll
+    methods:    GET
+
+materials:
+    path:       /materials
+    controller: App\Controller\MaterialController::getAll
+    methods:    GET
+
+about-us:
+    path:       /about-us/{id}
+    controller: App\Controller\AboutUsController::getOne
+    methods:    GET
