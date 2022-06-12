@@ -2,15 +2,18 @@
 
 namespace App\Controller;
 
+use App\Helper\RequestDataExtractor;
 use App\Helper\ValidateCodeHttp;
 use Doctrine\Persistence\ObjectRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 abstract class BaseController extends AbstractController
 {
     use ValidateCodeHttp;
+    use RequestDataExtractor;
 
     private ObjectRepository $repository;
 
@@ -19,9 +22,13 @@ abstract class BaseController extends AbstractController
         $this->repository = $repository;
     }
 
-    public function getAll(): Response
+    public function getAll(Request $request): Response
     {
-        $entityList = $this->repository->findAll();
+        $queryString = $this->getQueryStringDatas($request);
+        $order = $this->getOrderDatas($request);
+        [$page, $size] = $this->getPaginationDatas($request);
+
+        $entityList = $this->repository->findBy($queryString, $order, $size, ($page - 1) * $size);
 
         $code = $this->getCodeBetween($entityList, Response::HTTP_OK, Response::HTTP_NO_CONTENT);
 
