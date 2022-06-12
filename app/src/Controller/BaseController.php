@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Factory\ResponseFactory;
 use App\Helper\RequestDataExtractor;
 use App\Helper\ValidateCodeHttp;
 use Doctrine\Persistence\ObjectRepository;
@@ -32,7 +33,9 @@ abstract class BaseController extends AbstractController
 
         $code = $this->getCodeBetween($entityList, Response::HTTP_OK, Response::HTTP_NO_CONTENT);
 
-        return new JsonResponse($entityList, $code);
+        $response = new ResponseFactory($code, $entityList, $page, $size);
+
+        return $response->getResponse();
     }
 
     public function getOne(int $id): JsonResponse

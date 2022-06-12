@@ -26,8 +26,6 @@ trait RequestDataExtractor
             : 1;
         unset($queryString['page']);
 
-
-
         return [$queryString, $order, $page, $size];
     }
 
