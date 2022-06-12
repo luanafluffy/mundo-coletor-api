@@ -44,6 +44,8 @@ abstract class BaseController extends AbstractController
 
         $code = $this->getCodeBetween($entity, Response::HTTP_OK, Response::HTTP_BAD_REQUEST);
 
-        return new JsonResponse($entity, $code);
+        $response = new ResponseFactory($code, $entity);
+
+        return $response->getResponse();
     }
 }

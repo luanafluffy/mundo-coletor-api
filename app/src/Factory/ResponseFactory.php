@@ -8,15 +8,15 @@ use Symfony\Component\HttpFoundation\Response;
 class ResponseFactory
 {
     private int $code;
-    private $responseContent;
-    private int $page;
-    private int $size;
+    private mixed $responseContent;
+    private ?int $page;
+    private ?int $size;
 
     public function __construct(
         int $code = Response::HTTP_OK,
-        $responseContent,
-        int $page  = null,
-        int $size = null
+        mixed $responseContent,
+        ?int $page  = null,
+        ?int $size = null
     ) {
         $this->code = $code;
         $this->responseContent = $responseContent;
@@ -31,6 +31,10 @@ class ResponseFactory
             'size' => $this->size,
             'results' => $this->responseContent,
         ];
+
+        if (!$this->page && !$this->size) {
+            $response = $this->responseContent;
+        }
 
         return new JsonResponse($response, $this->code);
     }
